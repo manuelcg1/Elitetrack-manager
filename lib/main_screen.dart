@@ -15,9 +15,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_android/shared_preferences_android.dart';
-import 'package:traccar_manager/error_screen.dart';
-import 'package:traccar_manager/main.dart';
-import 'package:traccar_manager/token_store.dart';
+import 'package:elite_track/error_screen.dart';
+import 'package:elite_track/main.dart';
+import 'package:elite_track/token_store.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MainScreen extends StatefulWidget {

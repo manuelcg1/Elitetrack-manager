@@ -3,7 +3,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rate_my_app/rate_my_app.dart';
-import 'package:traccar_manager/main_screen.dart';
+import 'package:elite_track/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

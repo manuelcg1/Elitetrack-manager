@@ -1,11 +1,9 @@
-name: EliteTrack
-description: "App de rastreo GPS EliteTrack"
+name: elite_track
+description: "Aplicativo de rastreo GPS"
 publish_to: "none"
 version: 6.0.5+71
-
 environment:
   sdk: ^3.7.2
-
 dependencies:
   app_links: ^7.0.0
   firebase_analytics: ^12.4.1
@@ -25,17 +23,16 @@ dependencies:
   shared_preferences: ^2.5.5
   shared_preferences_android: ^2.4.23
   url_launcher: ^6.3.2
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
-
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon/EliteTrack-logo1.jpg"
-
+  image_path: "assets/icon/logo.png"
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/logo.png
