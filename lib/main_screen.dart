@@ -59,16 +59,20 @@ class _MainScreenState extends State<MainScreen> {
       if (uri.scheme == 'org.traccar.manager') {
         final baseUri = Uri.parse(_getUrl());
         final appPathSegments = [uri.host, ...uri.pathSegments];
-        final updatedQueryParameters = Map<String, String>.from(uri.queryParameters);
+        final updatedQueryParameters = Map<String, String>.from(
+          uri.queryParameters,
+        );
         if (uri.queryParameters.containsKey('code')) {
-          updatedQueryParameters['redirect_uri'] = uri.toString().split('?').first;
+          updatedQueryParameters['redirect_uri'] =
+              uri.toString().split('?').first;
         }
         final updatedUri = uri.replace(
           scheme: baseUri.scheme,
           host: baseUri.host,
           port: baseUri.port,
           path: '/${appPathSegments.join('/')}',
-          queryParameters: updatedQueryParameters.isEmpty ? null : updatedQueryParameters,
+          queryParameters:
+              updatedQueryParameters.isEmpty ? null : updatedQueryParameters,
         );
         _loadUrl(updatedUri);
       } else {
@@ -85,11 +89,18 @@ class _MainScreenState extends State<MainScreen> {
         scheme: 'org.traccar.manager',
         host: redirectSegments.first,
         path: '/${redirectSegments.skip(1).join('/')}',
-        queryParameters: originalRedirect.queryParameters.isEmpty ? null : originalRedirect.queryParameters,
+        queryParameters:
+            originalRedirect.queryParameters.isEmpty
+                ? null
+                : originalRedirect.queryParameters,
       );
-      final updatedQueryParameters = Map<String, String>.from(uri.queryParameters)
-        ..['redirect_uri'] = updatedRedirect.toString();
-      await launchUrl(uri.replace(queryParameters: updatedQueryParameters), mode: LaunchMode.externalApplication);
+      final updatedQueryParameters = Map<String, String>.from(
+        uri.queryParameters,
+      )..['redirect_uri'] = updatedRedirect.toString();
+      await launchUrl(
+        uri.replace(queryParameters: updatedQueryParameters),
+        mode: LaunchMode.externalApplication,
+      );
     } catch (e) {
       developer.log('Failed to launch authorize request', error: e);
     }
@@ -102,19 +113,20 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   String _getUrl() {
-    final url = _preferences.getString(_urlKey) ?? 'https://demo.traccar.org';
-    return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
+    return 'http://192.168.100.50:3000/';
   }
 
   bool _isDownloadable(Uri uri) {
-    final lastSegment = uri.pathSegments.isNotEmpty ? uri.pathSegments.last.toLowerCase() : '';
+    final lastSegment =
+        uri.pathSegments.isNotEmpty ? uri.pathSegments.last.toLowerCase() : '';
     return ['xlsx', 'kml', 'csv', 'gpx'].contains(lastSegment);
   }
 
   Future<void> _shareFile(String fileName, Uint8List bytes) async {
-    final directory = Platform.isAndroid
-      ? await getExternalStorageDirectory()
-      : await getApplicationDocumentsDirectory();
+    final directory =
+        Platform.isAndroid
+            ? await getExternalStorageDirectory()
+            : await getApplicationDocumentsDirectory();
     final file = File('${directory!.path}/$fileName');
     await file.writeAsBytes(bytes);
     await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
@@ -124,7 +136,10 @@ class _MainScreenState extends State<MainScreen> {
     try {
       final token = await _loginTokenStore.read(false);
       if (token == null) return;
-      final response = await http.get(uri, headers: {'Authorization': 'Bearer $token'});
+      final response = await http.get(
+        uri,
+        headers: {'Authorization': 'Bearer $token'},
+      );
       if (response.statusCode == 200) {
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         final extension = uri.pathSegments.last;
@@ -145,9 +160,13 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _initWebView() async {
     _preferences = await SharedPreferencesWithCache.create(
-      sharedPreferencesOptions: Platform.isAndroid
-        ? SharedPreferencesAsyncAndroidOptions(backend: SharedPreferencesAndroidBackendLibrary.SharedPreferences)
-        : SharedPreferencesOptions(),
+      sharedPreferencesOptions:
+          Platform.isAndroid
+              ? SharedPreferencesAsyncAndroidOptions(
+                backend:
+                    SharedPreferencesAndroidBackendLibrary.SharedPreferences,
+              )
+              : SharedPreferencesOptions(),
       cacheOptions: SharedPreferencesWithCacheOptions(allowList: {'url'}),
     );
 
@@ -177,15 +196,24 @@ class _MainScreenState extends State<MainScreen> {
       }
     });
     await _messaging.requestPermission();
-    await _authenticated.future.timeout(const Duration(seconds: 30), onTimeout: () {});
+    await _authenticated.future.timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {},
+    );
     _messaging.onTokenRefresh.listen((newToken) {
-      _controller?.evaluateJavascript(source: "updateNotificationToken?.('$newToken')");
+      _controller?.evaluateJavascript(
+        source: "updateNotificationToken?.('$newToken')",
+      );
     });
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       final notification = message.notification;
       if (notification != null) {
-        _controller?.evaluateJavascript(source: "handleNativeNotification?.(${jsonEncode(message.toMap())})");
-        messengerKey.currentState?.showSnackBar(SnackBar(content: Text(notification.body ?? 'Unknown')));
+        _controller?.evaluateJavascript(
+          source: "handleNativeNotification?.(${jsonEncode(message.toMap())})",
+        );
+        messengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text(notification.body ?? 'Unknown')),
+        );
       }
     });
   }
@@ -200,7 +228,9 @@ class _MainScreenState extends State<MainScreen> {
         try {
           final notificationToken = await _messaging.getToken();
           if (notificationToken != null) {
-            _controller?.evaluateJavascript(source: "updateNotificationToken?.('$notificationToken')");
+            _controller?.evaluateJavascript(
+              source: "updateNotificationToken?.('$notificationToken')",
+            );
           }
         } catch (e) {
           developer.log('Failed to get notification token', error: e);
@@ -208,7 +238,9 @@ class _MainScreenState extends State<MainScreen> {
       case 'authentication':
         final loginToken = await _loginTokenStore.read(true);
         if (loginToken != null) {
-          _controller?.evaluateJavascript(source: "handleLoginToken?.('$loginToken')");
+          _controller?.evaluateJavascript(
+            source: "handleLoginToken?.('$loginToken')",
+          );
         }
       case 'authenticated':
         if (!_authenticated.isCompleted) _authenticated.complete();
@@ -221,10 +253,8 @@ class _MainScreenState extends State<MainScreen> {
           developer.log('Failed to save downloaded file', error: e);
         }
       case 'server':
-        final url = parts[1];
-        await _loginTokenStore.delete();
-        await _preferences.setString(_urlKey, url);
-        await _loadUrl(Uri.parse(url));
+        // Deshabilitado: la URL del servidor es fija para esta empresa
+        break;
     }
   }
 
@@ -237,7 +267,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _loadUrl(Uri uri) async {
-    await _controller?.loadUrl(urlRequest: URLRequest(url: WebUri(uri.toString())));
+    await _controller?.loadUrl(
+      urlRequest: URLRequest(url: WebUri(uri.toString())),
+    );
   }
 
   @override
@@ -267,7 +299,8 @@ class _MainScreenState extends State<MainScreen> {
         if (didPop) return;
         _controller?.getUrl().then((url) {
           _controller?.canGoBack().then((canGoBack) {
-            if (canGoBack == true && !_isRootOrLogin(_getUrl(), url?.toString())) {
+            if (canGoBack == true &&
+                !_isRootOrLogin(_getUrl(), url?.toString())) {
               _controller?.goBack();
             } else {
               SystemNavigator.pop();
@@ -347,7 +380,12 @@ class _MainScreenState extends State<MainScreen> {
                 return NavigationActionPolicy.ALLOW;
               }
               final uri = Uri.parse(target.toString());
-              if (['response_type', 'client_id', 'redirect_uri', 'scope'].every(uri.queryParameters.containsKey)) {
+              if ([
+                'response_type',
+                'client_id',
+                'redirect_uri',
+                'scope',
+              ].every(uri.queryParameters.containsKey)) {
                 _launchAuthorizeRequest(uri);
                 return NavigationActionPolicy.CANCEL;
               }
@@ -367,13 +405,16 @@ class _MainScreenState extends State<MainScreen> {
             },
             onReceivedError: (controller, request, error) {
               if (request.isForMainFrame == true) {
-                final isInterruptedFrameLoad = Platform.isIOS && error.description.contains('code=102');
-                if (error.type == WebResourceErrorType.CANCELLED || isInterruptedFrameLoad) {
+                final isInterruptedFrameLoad =
+                    Platform.isIOS && error.description.contains('code=102');
+                if (error.type == WebResourceErrorType.CANCELLED ||
+                    isInterruptedFrameLoad) {
                   return;
                 }
-                final errorMessage = error.description.isNotEmpty
-                  ? error.description
-                  : error.type.toString();
+                final errorMessage =
+                    error.description.isNotEmpty
+                        ? error.description
+                        : error.type.toString();
                 setState(() => _loadingError = errorMessage);
               }
             },
@@ -396,7 +437,8 @@ class _MainScreenState extends State<MainScreen> {
               for (final resource in request.resources) {
                 PermissionStatus status;
                 final resourceUpper = resource.toString().toUpperCase();
-                if (resourceUpper.contains('VIDEO_CAPTURE') || resourceUpper.contains('CAMERA')) {
+                if (resourceUpper.contains('VIDEO_CAPTURE') ||
+                    resourceUpper.contains('CAMERA')) {
                   status = await Permission.camera.request();
                 } else {
                   allGranted = false;
@@ -406,9 +448,10 @@ class _MainScreenState extends State<MainScreen> {
               }
               return PermissionResponse(
                 resources: request.resources,
-                action: allGranted
-                  ? PermissionResponseAction.GRANT
-                  : PermissionResponseAction.DENY,
+                action:
+                    allGranted
+                        ? PermissionResponseAction.GRANT
+                        : PermissionResponseAction.DENY,
               );
             },
           ),
