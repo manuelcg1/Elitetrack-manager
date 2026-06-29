@@ -15,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_android/shared_preferences_android.dart';
+import 'package:elite_track/app_config.dart';
 import 'package:elite_track/error_screen.dart';
 import 'package:elite_track/main.dart';
 import 'package:elite_track/token_store.dart';
@@ -56,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
     await _initialized.future;
     _appLinks = AppLinks();
     _appLinksSubscription = _appLinks.uriLinkStream.listen((uri) {
-      if (uri.scheme == 'org.traccar.manager') {
+      if (uri.scheme == AppConfig.deepLinkScheme) {
         final baseUri = Uri.parse(_getUrl());
         final appPathSegments = [uri.host, ...uri.pathSegments];
         final updatedQueryParameters = Map<String, String>.from(
@@ -86,7 +87,7 @@ class _MainScreenState extends State<MainScreen> {
       final originalRedirect = Uri.parse(uri.queryParameters['redirect_uri']!);
       final redirectSegments = originalRedirect.pathSegments;
       final updatedRedirect = Uri(
-        scheme: 'org.traccar.manager',
+        scheme: AppConfig.deepLinkScheme,
         host: redirectSegments.first,
         path: '/${redirectSegments.skip(1).join('/')}',
         queryParameters:
@@ -113,7 +114,12 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   String _getUrl() {
-    return 'http://192.168.100.50:3000/';
+    return AppConfig.serverUri.toString();
+  }
+
+  String _buildServerPath(String path) {
+    final base = AppConfig.serverUri;
+    return base.resolve(path).toString();
   }
 
   bool _isDownloadable(Uri uri) {
@@ -175,7 +181,7 @@ class _MainScreenState extends State<MainScreen> {
     if (initialMessage != null) {
       final eventId = initialMessage.data['eventId'];
       if (eventId != null) {
-        url = '$url/event/$eventId';
+        url = _buildServerPath('event/$eventId');
       }
     }
 
@@ -192,7 +198,7 @@ class _MainScreenState extends State<MainScreen> {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       final eventId = message.data['eventId'];
       if (eventId != null) {
-        _loadUrl(Uri.parse('${_getUrl()}/event/$eventId'));
+        _loadUrl(Uri.parse(_buildServerPath('event/$eventId')));
       }
     });
     await _messaging.requestPermission();

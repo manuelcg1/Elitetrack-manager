@@ -1,0 +1,58 @@
+🔁 Flujo completo: cada vez que vas a hacer un cambio nuevo
+powershell# 1. Verifica dónde estás parado
+git branch
+
+# 2. Ve a main y trae lo último
+git checkout main
+git pull origin main
+
+# 3. Crea una rama nueva para este cambio específico
+git checkout -b feature/nombre-del-cambio
+
+# 4. Confirma que ya estás en la rama nueva
+git branch
+
+✏️ Mientras editas el código
+powershell# Edita archivos en VS Code...
+
+# Ver qué archivos cambiaron
+git status
+
+# Ver el detalle de qué líneas cambiaron (opcional, antes de comitear)
+git diff
+
+# Verificar que no rompiste nada
+flutter analyze
+
+💾 Guardar el cambio (commit)
+powershellgit add .
+git commit -m "Descripción clara del cambio"
+
+☁️ Subir a GitHub
+powershellgit push -u origin feature/nombre-del-cambio
+(El -u solo es necesario la primera vez que subes esa rama nueva. Las siguientes veces, basta con git push.)
+
+🔀 Crear y mergear el Pull Request
+
+Ve al link que te da la terminal después del push, o entra a GitHub → Pull requests → New pull request
+Confirma: base: main ← compare: feature/nombre-del-cambio
+Click Create pull request
+Espera el check de flutter analyze (verde ✅)
+Click Merge pull request
+
+
+🧹 Limpieza después del merge
+powershellgit checkout main
+git pull origin main
+git branch -d feature/nombre-del-cambio
+
+# Ver historial de commits
+git log --oneline -10
+
+# Compilar el APK final
+flutter clean
+flutter pub get
+flutter build apk --release
+
+
+puntos mas resaltantes, los avances y las estrategias
